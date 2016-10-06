@@ -13,6 +13,7 @@ Log in, upload an audio file (limited to 100 MByte per file) or choose a previou
 - `F1` through `F4` jump back 1-4 seconds and play from there
 - `Enter` submit/save a piece of transcript which gets a timestamp and is ascribed to the currently set speaker (indiciated by the little dropdown next to the textbox on the bottom)
 - `Shift`+`Enter` add a line break into the textbox without submitting/saving
+- `F6` through `F8` enter auto-play mode where Easy Transcript plays for 4 (`F6`), 5 (`F7`), or 6 (`F8`) seconds, then pauses for one second, jumps back 2 seconds, and ultimately restarts the same procedure (playing for 4/5/6 seconds, pausing, jumping back). According to your typing speed, the speed of the speaker(s), and a somewhat adjusted speed setting, this auto-play feature gives you the perfect setup for just transcribing while listening. If I set it up correctly (i.e., adjusted to me and the audio file) this allows me to straighly transcribe through the file without the necessity of much additional pausing or jumping. And the best thing about the that is that you can actually calculate the time necessary and thus plan ahead. That's because every 4 seconds will take you an additional 3 seconds (1 = pause, 2 = jumping back). For example, if your file is 32 minutes long and you can work well with the 4-second auto-play feature combined with a audio-play speed that is reduced by one point on the scale (i.e., 90%), the 32-minute file will take you `32min = 1920sec x 110% (speed) x 175% (auto-play feature using 7 for every 4 seconds) = 3696sec = 61.6min or 61min and 36sec`.
 
 ## Let's set it up.
 You need to have a server (or a webserver provider) that includes PHP and MySQL (a database). Then, the steps are as follows:
@@ -59,6 +60,9 @@ The audio files, once uploaded, are not accessible from outside except one knows
 
 ### Does it automatically transcribe?
 No, sorry.
+
+### But I read something about an auto-play setting?
+True, but it's auto-**play**, not auto-transcribe. This setting tells Easy Transcript to play a few seconds, then pause, jump back a little bit, and continue again. This should allow you to easily transcribe without the necessity of pausing or jumping all the time. Oh, and if it doesn't help you you can just ignore it.
 
 ### What audio formats are accepted?
 Most that I know of. But for file size reasons you can convert it into `.mp3` or `.mp4`. If you want to do so you could use https://cloudconvert.com/

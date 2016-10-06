@@ -76,31 +76,37 @@
                             <span class="sTimeTotal"></span>
                         </p>
                         <div id="transcriptcontrol" class="text-center row">
-                            <div class="col-xs-2">
+                            <div class="col-xs-3">
                                 Controls:<br />
-                                <a href="#" class="back btn btn-default" title="jump back 4 seconds (use F3 to jump back 3 seconds, F2 for 2 seconds, or F1 for 1 second)">
-                                    <i class="glyphicon glyphicon-backward"></i>
-                                    (F4)
-                                </a>
-                                <a href="#" class="play btn btn-default">
-                                    <i class="glyphicon glyphicon-play"></i>
-                                    <i class="glyphicon glyphicon-pause"></i> 
-                                    (F5)
-                                </a>
-                            </div>
-                            <div class="col-xs-3">
-                                Speed: 
-                                <input class="speed" type="range" min="1" max="200" value="100" step="10" />
-                            </div>
-                            <div class="col-xs-3">
-                                Volume: 
-                                <input class="volume" type="range" min="1" max="200" value="100" step="10" />
+                                <div class="btn-group" role="group">
+                                    <a href="#" class="back btn btn-default" title="jump back 4 seconds (use F3 to jump back 3 seconds, F2 for 2 seconds, or F1 for 1 second)">
+                                        <i class="glyphicon glyphicon-backward"></i> 
+                                        <span class="label label-default">F4</span>
+                                    </a>
+                                    <a href="#" class="play btn btn-default" title="play/pause">
+                                        <i class="glyphicon glyphicon-play"></i>
+                                        <i class="glyphicon glyphicon-pause"></i> 
+                                        <span class="label label-default">F5</span>
+                                    </a>
+                                    <a href="#" class="autoplay btn btn-default" title="auto-play for 4 seconds (use F7 for 5 seconds or F8 for 6 seconds), then wait (1s), jump back (2s), and go on playing">
+                                        <i class="glyphicon glyphicon-step-forward"></i> 
+                                        <span class="label label-default">F6</span>
+                                    </a>
+                                </div>
                             </div>
                             <div class="col-xs-2">
                                 # of speakers: 
                                 <input class="parties form-control" type="number" min="1" max="999" value="1" />
                             </div>
                             <div class="col-xs-2">
+                                Speed: 
+                                <input class="speed" type="range" min="1" max="200" value="100" step="10" />
+                            </div>
+                            <div class="col-xs-2">
+                                Volume: 
+                                <input class="volume" type="range" min="1" max="200" value="100" step="10" />
+                            </div>
+                            <div class="col-xs-3">
                                 Download:<br />
                                 <a href="#" class="download with">incl. time</a> &middot;
                                 <a href="#" class="download without">excl. time</a>
@@ -121,6 +127,10 @@
                                     <select id="nCurrentParty" class="form-control">
                                         <option value="1">1</option>
                                     </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sCurrentTimestamp"><i class="glyphicon glyphicon-time"></i></label>
+                                    <input type="text" id="sCurrentTimestamp" class="form-control" />
                                 </div>
                             </form>
                         </div>

@@ -4,6 +4,7 @@ var ETtranscript = {
     sTranscriptList: '#transcriptlist',
     sTranscript: '#transcript',
     sCurrentParty: '#nCurrentParty',
+    sCurrentOffset: '#sCurrentTimestamp',
     sTimeCurrent: '.sTimeCurrent',
     sTimeTotal: '.sTimeTotal',
     oTranscript: null,
@@ -13,6 +14,8 @@ var ETtranscript = {
     oTranscriptCache: null,
     fCallbackOnLoad: null,
     nLoaded: 0,
+    nAutoPlayBack: 0,
+    nAutoPlayBackLastStop: 0,
     
     init: function() {
         if(ETtranscript.oTranscript !== null) {
@@ -24,10 +27,26 @@ var ETtranscript = {
                 }
                 ETaudio.load(ETtranscript.oTranscript.sAudio, function() {
                         $(ETtranscript.sTimeTotal).text(ETtranscript.convertOffsetToTime(ETaudio.getLength()));
-                        $(ETtranscript.sTimeCurrent).text(ETtranscript.convertOffsetToTime(ETtranscript.oTranscript.nCurrentOffset));
-                        ETaudio.jumpBySeconds(ETtranscript.oTranscript.nCurrentOffset);
+                        ETtranscript.nCurrentOffset = ETtranscript.oTranscript.nCurrentOffset;
+                        ETaudio.jumpBySeconds(ETtranscript.nCurrentOffset);
+                        var sOffset = ETtranscript.convertOffsetToTime(ETtranscript.nCurrentOffset);
+                        $(ETtranscript.sTimeCurrent).text(sOffset);
+                        $(ETtranscript.sCurrentOffset).val(sOffset);
                         ETaudio.setPlayerCallback(function(_nPosition) {
                                 $(ETtranscript.sTimeCurrent).text(ETtranscript.convertOffsetToTime(_nPosition));
+                                if(ETtranscript.nAutoPlayBack > 0) {
+                                    var nCurrentPos = ETaudio.getCurrentPos();
+                                    if(nCurrentPos >= (ETtranscript.nAutoPlayBack + ETtranscript.nAutoPlayBackLastStop)) {
+                                        ETaudio.pause();
+                                        window.setTimeout(function() {
+                                                if(ETtranscript.nAutoPlayBack > 0) {
+                                                    ETtranscript.nAutoPlayBackLastStop = nCurrentPos - 2;
+                                                    ETaudio.jumpBySeconds(ETtranscript.nAutoPlayBackLastStop);
+                                                    ETaudio.play();
+                                                }
+                                            }, 1000);
+                                    }
+                                }
                             });
                         ETtranscript.finalizeInit();
                     });
@@ -38,6 +57,14 @@ var ETtranscript = {
                 $(ETtranscript.sCurrentParty).on('change', function() {
                         ETtranscript.nCurrentParty = $(this).val();
                         ETtranscript.updateTranscript();
+                    });
+                $(ETtranscript.sCurrentOffset).on('change', function() {
+                        ETtranscript.nCurrentOffset = ETtranscript.convertTimeToOffset($(this).val());
+                        ETtranscript.updateTranscript();
+                    });
+                $(ETtranscript.sTranscriptControl).find('.autoplay').on('click', function(_oEvent) {
+                        _oEvent.preventDefault();
+                        ETtranscript.toggleAutoMode(4);
                     });
                 $(ETtranscript.sTranscriptControl).find('.download').on('click', function(_oEvent) {
                         _oEvent.preventDefault();
@@ -72,6 +99,12 @@ var ETtranscript = {
                                 _oEvent.preventDefault();
                                 ETaudio.playPause();
                                 break;
+                            case 117: //f6
+                            case 118: //f7
+                            case 119: //f8
+                                _oEvent.preventDefault();
+                                ETtranscript.toggleAutoMode(_oEvent.which - 113);
+                                break;
                         }
                     });
                 $.post(ETtranscript.sServer + '&a=load', { nTraId: ETtranscript.oTranscript.nTraId }, function(_oResult) {
@@ -83,6 +116,19 @@ var ETtranscript = {
                         }
                     }, 'json');
             }
+        }
+    },
+    
+    toggleAutoMode: function(_nSeconds) {
+        if(_nSeconds <= 0 || ETtranscript.nAutoPlayBack == _nSeconds) {
+            ETtranscript.nAutoPlayBack = 0;
+            $(ETtranscript.sTranscriptControl).find('.autoplay').removeClass('active');
+            ETaudio.pause();
+        } else {
+            ETtranscript.nAutoPlayBack = _nSeconds;
+            ETtranscript.nAutoPlayBackLastStop = ETaudio.getCurrentPos();
+            $(ETtranscript.sTranscriptControl).find('.autoplay').addClass('active');
+            ETaudio.play();
         }
     },
     
@@ -157,6 +203,16 @@ var ETtranscript = {
         return aColor[_nParty];
     },
     
+    convertTimeToOffset: function(_sTime) {
+        var aTime = $.trim(_sTime).split(':'),
+            nOffset = 0;
+        aTime.reverse();
+        for(var i = 0; i < aTime.length; i++) {
+            nOffset += Math.pow(60, i)*Number(aTime[i]);
+        }
+        return nOffset;
+    },
+    
     convertOffsetToTime: function(_nOffset) {
         var nTotalLength = ETaudio.getLength(),
             aTime = [ 0, 0, 0 ];
@@ -229,7 +285,7 @@ var ETtranscript = {
         if(typeof(_bUseCache) === 'undefined' || !_bUseCache) {
             ETtranscript.oTranscriptCache = { 
                 nTraId: ETtranscript.oTranscript.nTraId, 
-                nOffset: ETtranscript.nCurrentOffset, 
+                nOffset: ETtranscript.convertTimeToOffset($(ETtranscript.sCurrentOffset).val()), 
                 nParty: ETtranscript.nCurrentParty, 
                 sTranscript: $(ETtranscript.sTranscript).val() 
             };
@@ -250,6 +306,7 @@ var ETtranscript = {
             }, 'json');
         //update party, offset, and textarea
         ETtranscript.nCurrentOffset = ETaudio.getCurrentPos();
+        $(ETtranscript.sCurrentOffset).val(ETtranscript.convertOffsetToTime(ETtranscript.nCurrentOffset));
         ETtranscript.nCurrentParty = ETtranscript.oTranscriptCache.nParty + 1;
         if(ETtranscript.nCurrentParty > ETtranscript.oTranscript.nPartyCount) {
             ETtranscript.nCurrentParty = 1;
@@ -294,6 +351,8 @@ var ETtranscript = {
                     ETtranscript.oTranscript.nPartyCount = _oResult.data.nPartyCount;
                     ETtranscript.oTranscript.nSpeed = _oResult.data.nSpeed;
                     ETtranscript.oTranscript.nVolume = _oResult.data.nVolume;
+                    ETtranscript.oTranscript.nCurrentOffset = _oResult.data.nCurrentOffset;
+                    ETtranscript.oTranscript.nCurrentParty = _oResult.data.nCurrentParty;
                     ETtranscript.initTranscriptControls();
                 } else {
                     alert('Urghs, something went wrong during the update. Please try to change it again.');
