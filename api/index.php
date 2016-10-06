@@ -21,30 +21,37 @@ function loadSingleRow(&$_oDb, $_sTable, $_nKey) {
 }
 //added password protection by MarHai
 require_once('config.php');
-if(isset($_GET['p']) && strtolower($_GET['p']) === PASSWORD_HASH) {
-	unset($_GET['p']);
+$oDb = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE);
+$oDb->query('SET NAMES utf8');
+$nLogin = login($oDb);
+if($nLogin !== NULL && $nLogin > 0) {
     //added API actions
     if(isset($_GET['a'])) {
-        $oDb = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE);
-        $oDb->query('SET NAMES utf8');
         $aResult = [];
         switch($_GET['a']) {
             case 'load':
                 $aResult['nTraId'] = intval($_POST['nTraId']);
-                if(($oResult = $oDb->query(sprintf('SELECT * FROM `part` WHERE nTraId = %d ORDER BY nOffset ASC', $aResult['nTraId'])))) {
-                    $aResult['success'] = TRUE;
-                    $aResult['data'] = [];
-                    while(($aRow = $oResult->fetch_assoc())) {
-                        $aResult['data'][] = $aRow;
+                $aTranscript = loadSingleRow($oDb, 'transcript', $aResult['nTraId']);
+                if(isset($aTranscript['nUseId']) && $aTranscript['nUseId'] == $nLogin) {
+                    if(($oResult = $oDb->query(sprintf('SELECT * FROM `part` WHERE nTraId = %d ORDER BY nOffset ASC', $aResult['nTraId'])))) {
+                        $aResult['success'] = TRUE;
+                        $aResult['data'] = [];
+                        while(($aRow = $oResult->fetch_assoc())) {
+                            $aResult['data'][] = $aRow;
+                        }
+                    } else {
+                        $aResult['success'] = FALSE;
+                        $aResult['error'] = 'Loading parts failed due to '.$oDb->error;
                     }
                 } else {
                     $aResult['success'] = FALSE;
-                    $aResult['error'] = 'Loading parts failed due to '.$oDb->error;
+                    $aResult['error'] = 'No permission';
                 }
                 break;
             case 'addT':
-                if(($oDb->query(sprintf('INSERT INTO `transcript` (dCreate, dUpdate, nPartyCount, nSpeed, nVolume, sName, sAudio) 
-                                        VALUES (%d, %d, %d, %.2f, %.2f, \'%s\', \'%s\')', 
+                if(($oDb->query(sprintf('INSERT INTO `transcript` (nUseId, dCreate, dUpdate, nPartyCount, nSpeed, nVolume, sName, sAudio) 
+                                        VALUES (%d, %d, %d, %d, %.2f, %.2f, \'%s\', \'%s\')', 
+                                        $nLogin,
                                         time(),
                                         time(),
                                         1,
@@ -62,58 +69,80 @@ if(isset($_GET['p']) && strtolower($_GET['p']) === PASSWORD_HASH) {
                 }
                 break;
             case 'addP':
-                if(($oDb->query(sprintf('INSERT INTO `part` (nTraId, dCreate, dUpdate, nOffset, nParty, sTranscript) 
-                                        VALUES (%d, %d, %d, %d, %d, \'%s\')', 
-                                        intval($_POST['nTraId']),
-                                        time(),
-                                        time(),
-                                        intval($_POST['nOffset']),
-                                        intval($_POST['nParty']),
-                                        addslashes($_POST['sTranscript']))))) {
-                    
-                    $aResult['success'] = TRUE;
-                    $aResult['nParId'] = $oDb->insert_id;
-                    $aResult['data'] = loadSingleRow($oDb, 'part', $aResult['nParId']);
+                $nTraId = intval($_POST['nTraId']);
+                $aTranscript = loadSingleRow($oDb, 'transcript', $nTraId);
+                if(isset($aTranscript['nUseId']) && $aTranscript['nUseId'] == $nLogin) {
+                    if(($oDb->query(sprintf('INSERT INTO `part` (nTraId, dCreate, dUpdate, nOffset, nParty, sTranscript) 
+                                            VALUES (%d, %d, %d, %d, %d, \'%s\')', 
+                                            $nTraId,
+                                            time(),
+                                            time(),
+                                            intval($_POST['nOffset']),
+                                            intval($_POST['nParty']),
+                                            addslashes($_POST['sTranscript']))))) {
+
+                        $aResult['success'] = TRUE;
+                        $aResult['nParId'] = $oDb->insert_id;
+                        $aResult['data'] = loadSingleRow($oDb, 'part', $aResult['nParId']);
+                    } else {
+                        $aResult['success'] = FALSE;
+                        $aResult['error'] = 'Insertion failed due to '.$oDb->error;
+                    }
                 } else {
                     $aResult['success'] = FALSE;
-                    $aResult['error'] = 'Insertion failed due to '.$oDb->error;
+                    $aResult['error'] = 'No permission';
                 }
                 break;
             case 'deleteP':
                 $aResult['nParId'] = intval($_POST['nParId']);
-                if(($oDb->query(sprintf('DELETE FROM `part` WHERE nParId = %d LIMIT 1', $aResult['nParId'])))) {
-                    $aResult['success'] = TRUE;
+                $aPart = loadSingleRow($oDb, 'part', $aResult['nParId']);
+                $aTranscript = loadSingleRow($oDb, 'transcript', $aPart['nTraId']);
+                if(isset($aTranscript['nUseId']) && $aTranscript['nUseId'] == $nLogin) {
+                    if(($oDb->query(sprintf('DELETE FROM `part` WHERE nParId = %d LIMIT 1', $aResult['nParId'])))) {
+                        $aResult['success'] = TRUE;
+                    } else {
+                        $aResult['success'] = FALSE;
+                        $aResult['error'] = 'Deletion failed due to '.$oDb->error;
+                    }
                 } else {
                     $aResult['success'] = FALSE;
-                    $aResult['error'] = 'Deletion failed due to '.$oDb->error;
+                    $aResult['error'] = 'No permission';
                 }
                 break;
             case 'updateP':
                 $aResult['nParId'] = intval($_POST['nParId']);
-                if(($oDb->query(sprintf('UPDATE `part` SET dUpdate = %d, nOffset = %d, nParty = %d, sTranscript = \'%s\' WHERE nParId = %d LIMIT 1', 
-                                        time(),
-                                        intval($_POST['nOffset']),
-                                        intval($_POST['nParty']),
-                                        addslashes($_POST['sTranscript']),
-                                        $aResult['nParId'])))) {
-                    
-                    $aResult['success'] = TRUE;
-                    $aResult['data'] = loadSingleRow($oDb, 'part', $aResult['nParId']);
+                $aPart = loadSingleRow($oDb, 'part', $aResult['nParId']);
+                $aTranscript = loadSingleRow($oDb, 'transcript', $aPart['nTraId']);
+                if(isset($aTranscript['nUseId']) && $aTranscript['nUseId'] == $nLogin) {
+                    if(($oDb->query(sprintf('UPDATE `part` SET dUpdate = %d, nOffset = %d, nParty = %d, sTranscript = \'%s\' WHERE nParId = %d LIMIT 1', 
+                                            time(),
+                                            intval($_POST['nOffset']),
+                                            intval($_POST['nParty']),
+                                            addslashes($_POST['sTranscript']),
+                                            $aResult['nParId'])))) {
+
+                        $aResult['success'] = TRUE;
+                        $aResult['data'] = loadSingleRow($oDb, 'part', $aResult['nParId']);
+                    } else {
+                        $aResult['success'] = FALSE;
+                        $aResult['error'] = 'Update failed due to '.$oDb->error;
+                    }
                 } else {
                     $aResult['success'] = FALSE;
-                    $aResult['error'] = 'Update failed due to '.$oDb->error;
+                    $aResult['error'] = 'No permission';
                 }
                 break;
             case 'updateT':
                 $aResult['nTraId'] = intval($_POST['nTraId']);
-                if(($oDb->query(sprintf('UPDATE `transcript` SET dUpdate = %d, nPartyCount = %d, nSpeed = %.2f, nVolume = %.2f, nCurrentParty = %d, nCurrentOffset = %d WHERE nTraId = %d LIMIT 1', 
+                if(($oDb->query(sprintf('UPDATE `transcript` SET dUpdate = %d, nPartyCount = %d, nSpeed = %.2f, nVolume = %.2f, nCurrentParty = %d, nCurrentOffset = %d WHERE nTraId = %d AND nUseId = %d LIMIT 1', 
                                         time(),
                                         intval($_POST['nPartyCount']),
                                         floatval($_POST['nSpeed']),
                                         floatval($_POST['nVolume']),
                                         intval($_POST['nCurrentParty']),
                                         intval($_POST['nCurrentOffset']),
-                                        $aResult['nTraId'])))) {
+                                        $aResult['nTraId'],
+                                        $nLogin)))) {
                     
                     $aResult['success'] = TRUE;
                     $aResult['data'] = loadSingleRow($oDb, 'transcript', $aResult['nTraId']);
@@ -133,38 +162,43 @@ if(isset($_GET['p']) && strtolower($_GET['p']) === PASSWORD_HASH) {
                         $aResult['success'] = TRUE;
                         $aResult['data'] = [];
                         $aTranscript = loadSingleRow($oDb, 'transcript', $aResult['nTraId']);
-                        $aResult['data'][] = $aTranscript['sName'];
-                        $aResult['data'][] = sprintf('(created with Easy Transcript <https://github.com/MarHai/easytranscript> on %s, last change on %s)', 
-                                                     date('Y-m-d H:i', $aTranscript['dCreate']), 
-                                                     date('Y-m-d H:i', $aTranscript['dUpdate'])
-                                                    );
-                        $nLastParty = NULL;
-                        while(($aRow = $oResult->fetch_assoc())) {
-                            if($nLastParty !== $aRow['nParty']) {
-                                $nLastParty = $aRow['nParty'];
-                                $aResult['data'][] = '';
-                                $aResult['data'][] = '#'.$nLastParty;
-                            }
-                            $sLine = '';
-                            if($aResult['bWithTimecodes']) {
-                                $sLine .= '[';
-                                $aTime = [];
-                                $aTime[] = floor($aRow['nOffset']/3600);
-                                $aRow['nOffset'] = $aRow['nOffset'] % 3600;
-                                $aTime[] = floor($aRow['nOffset']/60);
-                                $aRow['nOffset'] = $aRow['nOffset'] % 60;
-                                $aTime[] = intval($aRow['nOffset']);
-                                for($i = 0; $i < count($aTime); $i++) {
-                                    if($i > 0) {
-                                        $sLine .= ':';
-                                    }
-                                    $sLine .= $aTime[$i] < 10 ? '0' : '';
-                                    $sLine .= $aTime[$i];
+                        if(isset($aTranscript['nUseId']) && $aTranscript['nUseId'] == $nLogin) {
+                            $aResult['data'][] = $aTranscript['sName'];
+                            $aResult['data'][] = sprintf('(created with Easy Transcript <https://github.com/MarHai/easytranscript> on %s, last change on %s)', 
+                                                         date('Y-m-d H:i', $aTranscript['dCreate']), 
+                                                         date('Y-m-d H:i', $aTranscript['dUpdate'])
+                                                        );
+                            $nLastParty = NULL;
+                            while(($aRow = $oResult->fetch_assoc())) {
+                                if($nLastParty !== $aRow['nParty']) {
+                                    $nLastParty = $aRow['nParty'];
+                                    $aResult['data'][] = '';
+                                    $aResult['data'][] = '#'.$nLastParty;
                                 }
-                                $sLine .= '] ';
+                                $sLine = '';
+                                if($aResult['bWithTimecodes']) {
+                                    $sLine .= '[';
+                                    $aTime = [];
+                                    $aTime[] = floor($aRow['nOffset']/3600);
+                                    $aRow['nOffset'] = $aRow['nOffset'] % 3600;
+                                    $aTime[] = floor($aRow['nOffset']/60);
+                                    $aRow['nOffset'] = $aRow['nOffset'] % 60;
+                                    $aTime[] = intval($aRow['nOffset']);
+                                    for($i = 0; $i < count($aTime); $i++) {
+                                        if($i > 0) {
+                                            $sLine .= ':';
+                                        }
+                                        $sLine .= $aTime[$i] < 10 ? '0' : '';
+                                        $sLine .= $aTime[$i];
+                                    }
+                                    $sLine .= '] ';
+                                }
+                                $sLine .= $aRow['sTranscript'];
+                                $aResult['data'][] = $sLine;
                             }
-                            $sLine .= $aRow['sTranscript'];
-                            $aResult['data'][] = $sLine;
+                        } else {
+                            $aResult['success'] = FALSE;
+                            $aResult['error'] = 'No permission';
                         }
                     }
                 } else {
@@ -174,7 +208,7 @@ if(isset($_GET['p']) && strtolower($_GET['p']) === PASSWORD_HASH) {
                 break;
             case 'list':
             default:
-                if(($oResult = $oDb->query('SELECT * FROM `transcript` ORDER BY dUpdate DESC'))) {
+                if(($oResult = $oDb->query(sprintf('SELECT * FROM `transcript` WHERE nUseId = %d ORDER BY dUpdate DESC', $nLogin)))) {
                     $aResult['success'] = TRUE;
                     $aResult['data'] = [];
                     while(($aRow = $oResult->fetch_assoc())) {
@@ -193,5 +227,5 @@ if(isset($_GET['p']) && strtolower($_GET['p']) === PASSWORD_HASH) {
         $upload_handler = new UploadHandler();
     }
 } else {
-    die('{"error":"Incorrect password"}');
+    die('{"error":"Login unsuccessful"}');
 }

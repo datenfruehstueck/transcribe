@@ -29,8 +29,8 @@ var ETfile = {
         });
     },
     
-    setServerPassword: function(_sHash) {
-        ETfile.sServer += '?p=' + _sHash;
+    setServerPassword: function(_sUser, _sHash) {
+        ETfile.sServer += '?u=' + _sUser + '&p=' + _sHash;
     },
     
     setCallback: function(_fStart, _fEnd) {

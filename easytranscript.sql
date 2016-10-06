@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS `part` (
 
 CREATE TABLE IF NOT EXISTS `transcript` (
   `nTraId` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `nUseId` int(11) unsigned NOT NULL,
   `dCreate` int(35) unsigned NOT NULL,
   `dUpdate` int(35) unsigned NOT NULL,
   `nPartyCount` int(4) unsigned NOT NULL,
@@ -29,7 +30,21 @@ CREATE TABLE IF NOT EXISTS `transcript` (
   `sName` varchar(100) NOT NULL,
   `sAudio` varchar(255) NOT NULL,
   PRIMARY KEY (`nTraId`),
-  UNIQUE KEY `sName` (`sName`)
+  UNIQUE KEY `sName` (`sName`),
+  KEY `transcript-user` (`nUseId`),
+  CONSTRAINT `transcript-user` FOREIGN KEY (`nUseId`) REFERENCES `user` (`nUseId`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+CREATE TABLE IF NOT EXISTS `user` (
+  `nUseId` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `sMail` varchar(150) NOT NULL,
+  `sPassword` varchar(200) NOT NULL,
+  `dCreate` int(35) unsigned NOT NULL,
+  `dLastAction` int(35) unsigned NOT NULL,
+  `bActive` tinyint(2) unsigned NOT NULL DEFAULT '1',
+  PRIMARY KEY (`nUseId`),
+  UNIQUE KEY `sMail` (`sMail`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

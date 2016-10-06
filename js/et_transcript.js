@@ -18,6 +18,19 @@ var ETtranscript = {
     nAutoPlayBackLastStop: 0,
     oBeep: new Audio('beep.wav'),
     
+    uninit: function() {
+        ETtranscript.oTranscript = null;
+        ETtranscript.aPart = null;
+        ETtranscript.nCurrentParty = 1;
+        ETtranscript.nCurrentOffset = 0;
+        ETtranscript.oTranscriptCache = null;
+        ETtranscript.fCallbackOnLoad = null;
+        ETtranscript.nLoaded = 0;
+        ETtranscript.nAutoPlayBack = 0;
+        ETtranscript.nAutoPlayBackLastStop = 0;
+        $(ETtranscript.sTranscriptList).html('<p class="text-center">I am loading, please hold on ...</p>');
+    },
+    
     init: function() {
         if(ETtranscript.oTranscript !== null) {
             if(typeof(ETtranscript.oTranscript.sAudio) === 'undefined' || ETtranscript.oTranscript.sAudio == '') {
@@ -54,22 +67,22 @@ var ETtranscript = {
                     });
                 ETtranscript.initTranscriptControls();
                 ETtranscript.oBeep.volume = ETtranscript.oTranscript.nVolume*.3;
-                $(ETtranscript.sTranscriptControl).find('.parties, .speed, .volume').on('change', function() {
+                $(ETtranscript.sTranscriptControl).find('.parties, .speed, .volume').off('change').on('change', function() {
                         ETtranscript.updateTranscript();
                     });
-                $(ETtranscript.sCurrentParty).on('change', function() {
+                $(ETtranscript.sCurrentParty).off('change').on('change', function() {
                         ETtranscript.nCurrentParty = $(this).val();
                         ETtranscript.updateTranscript();
                     });
-                $(ETtranscript.sCurrentOffset).on('change', function() {
+                $(ETtranscript.sCurrentOffset).off('change').on('change', function() {
                         ETtranscript.nCurrentOffset = ETtranscript.convertTimeToOffset($(this).val());
                         ETtranscript.updateTranscript();
                     });
-                $(ETtranscript.sTranscriptControl).find('.autoplay').on('click', function(_oEvent) {
+                $(ETtranscript.sTranscriptControl).find('.autoplay').off('click').on('click', function(_oEvent) {
                         _oEvent.preventDefault();
                         ETtranscript.toggleAutoMode(4);
                     });
-                $(ETtranscript.sTranscriptControl).find('.download').on('click', function(_oEvent) {
+                $(ETtranscript.sTranscriptControl).find('.download').off('click').on('click', function(_oEvent) {
                         _oEvent.preventDefault();
                         if(confirm('You need to have popups enabled in order to download things here.')) {
                             $.post(ETtranscript.sServer + '&a=download', { nTraId: ETtranscript.oTranscript.nTraId, bWithTimecodes: Number($(this).hasClass('with')) },
@@ -82,7 +95,7 @@ var ETtranscript = {
                                 }, 'json');
                         }
                     });
-                $(ETtranscript.sTranscript).on('keydown', function(_oEvent) {
+                $(ETtranscript.sTranscript).off('keydown').on('keydown', function(_oEvent) {
                         switch(_oEvent.which) {
                             case 13: //enter
                                 if(!_oEvent.shiftKey) {
@@ -139,6 +152,7 @@ var ETtranscript = {
     finalizeInit: function() {
         ETtranscript.nLoaded++;
         if(ETtranscript.nLoaded == 2) {
+            $(ETtranscript.sTranscriptList).html('');
             if(ETtranscript.aPart.length > 0) {
                 $.each(ETtranscript.aPart, function(_i, _oPart) {
                         $(ETtranscript.sTranscriptList).append(ETtranscript.visualize(_i));
@@ -264,13 +278,14 @@ var ETtranscript = {
     initListener: function(_nParId) {
         var $oTextarea = $(ETtranscript.sTranscriptList).find('div[data-id="' + _nParId + '"] textarea');
         $oTextarea.height($oTextarea.get(0).scrollHeight);
-        $(ETtranscript.sTranscriptList).find('div[data-id="' + _nParId + '"] a.btn-danger').on('click', function(_oEvent) {
+        $(ETtranscript.sTranscriptList).find('div[data-id="' + _nParId + '"] a.btn-danger').off('click').on('click', function(_oEvent) {
                 _oEvent.preventDefault();
                 if(confirm('Are you sure you want to delete this part?')) {
                     ETtranscript.deletePart(ETtranscript.getPartIndexFromId(_nParId));
                 }
             });
         $(ETtranscript.sTranscriptList).find('div[data-id="' + _nParId + '"] textarea')
+            .off('focusin')
             .on('focusin', function(_oEvent) {
                 _oEvent.preventDefault();
                 $(this).removeClass('justreadme');
@@ -278,6 +293,7 @@ var ETtranscript = {
                 ETaudio.jumpBySeconds(ETtranscript.nAutoPlayBackLastStop);
                 ETaudio.play();
             })
+            .off('focusout')
             .on('focusout', function(_oEvent) {
                 _oEvent.preventDefault();
                 $(this).addClass('justreadme');
@@ -377,8 +393,8 @@ var ETtranscript = {
             }, 'json');
     },
     
-    setServerPassword: function(_sHash) {
-        ETtranscript.sServer += '?p=' + _sHash;
-        ETaudio.setServerPassword(_sHash);
+    setServerPassword: function(_sUser, _sHash) {
+        ETtranscript.sServer += '?u=' + _sUser + '&p=' + _sHash;
+        ETaudio.setServerPassword(_sUser, _sHash);
     }
 };

@@ -10,32 +10,35 @@ $(function() {
     }
     
     //login handler
-    $('#page_login input').on('keypress', function(_oEvent) {
+    $('#page_login input').off('keypress').on('keypress', function(_oEvent) {
         if(_oEvent.which == 13) {
             $('#page_login .btn-success').click();
         }
     });
-    $('#page_login .btn-success').on('click', function(_oEvent) {
+    $('#page_login .btn-success').off('click').on('click', function(_oEvent) {
         _oEvent.preventDefault();
         togglePage('load');
-        var sPasswordHash = CryptoJS.MD5($('#page_login input').val() + 'SALT').toString();
+        var sUser = $('#page_login input[type="text"]').val(),
+            sPasswordHash = CryptoJS.MD5($('#page_login input[type="password"]').val() + 'SALT').toString();
         //set upload page
-        ETfile.setServerPassword(sPasswordHash);
+        ETfile.setServerPassword(sUser, sPasswordHash);
         ETfile.init();
-        ETtranscript.setServerPassword(sPasswordHash);
+        ETtranscript.setServerPassword(sUser, sPasswordHash);
         //load available transcripts
-        $.getJSON('api/?a=list&p=' + sPasswordHash, function(_oResult) {
+        $.getJSON('api/?a=list&p=' + sPasswordHash + '&u=' + sUser, function(_oResult) {
                 if(_oResult.success && typeof(_oResult.data) !== 'undefined') {
+                    $('#choosetranscript option[value="0"]').nextAll('option').remove();
                     $.each(_oResult.data, function(_i, _oTranscript) {
                         oApp['nTraId-' + _oTranscript.nTraId] = _oTranscript;
                         $('#choosetranscript').append('<option value="' + _oTranscript.nTraId + '">' + _oTranscript.sName + 
                                                       ' (last change ' + moment.unix(_oTranscript.dUpdate).fromNow() + ')</option>');
                     });
-                    $('#choosetranscript').change(function() {
+                    $('#choosetranscript').off('change').on('change', function() {
                         togglePage('load');
                         ETtranscript.load(Number($(this).find('option:selected').attr('value')), function() {
                                 togglePage('transcribe');
                             });
+                        $(this).val('0');
                     });
                 }
                 //show upload page
@@ -43,6 +46,14 @@ $(function() {
             });
     });
     $('#page_login input').get(0).focus();
+    
+    //page navigation handler
+    $('#page_transcribe .navback').off('click').on('click', function(_oEvent) {
+            _oEvent.preventDefault();
+            ETaudio.stop();
+            togglePage('upload');
+            ETtranscript.uninit();
+        });
     
     //upload handler
     ETfile.setCallback(function() {}, function(_oFile) {

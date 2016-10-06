@@ -1,7 +1,10 @@
 <?php
 
 require_once('../config.php');
-if(isset($_GET['p']) && strtolower($_GET['p']) === PASSWORD_HASH) {
+$oDb = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE);
+$oDb->query('SET NAMES utf8');
+$nLogin = login($oDb);
+if($nLogin !== NULL && $nLogin > 0) {
     if(!empty($_GET['f']) && !preg_match('=/=', $_GET['f'])) {
         if(file_exists($_GET['f'])) {
             $oFileInfo = finfo_open(FILEINFO_MIME_TYPE);
