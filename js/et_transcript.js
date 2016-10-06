@@ -16,6 +16,7 @@ var ETtranscript = {
     nLoaded: 0,
     nAutoPlayBack: 0,
     nAutoPlayBackLastStop: 0,
+    oBeep: new Audio('beep.wav'),
     
     init: function() {
         if(ETtranscript.oTranscript !== null) {
@@ -38,6 +39,7 @@ var ETtranscript = {
                                     var nCurrentPos = ETaudio.getCurrentPos();
                                     if(nCurrentPos >= (ETtranscript.nAutoPlayBack + ETtranscript.nAutoPlayBackLastStop)) {
                                         ETaudio.pause();
+                                        ETtranscript.oBeep.play();
                                         window.setTimeout(function() {
                                                 if(ETtranscript.nAutoPlayBack > 0) {
                                                     ETtranscript.nAutoPlayBackLastStop = nCurrentPos - 2;
@@ -51,6 +53,7 @@ var ETtranscript = {
                         ETtranscript.finalizeInit();
                     });
                 ETtranscript.initTranscriptControls();
+                ETtranscript.oBeep.volume = ETtranscript.oTranscript.nVolume*.3;
                 $(ETtranscript.sTranscriptControl).find('.parties, .speed, .volume').on('change', function() {
                         ETtranscript.updateTranscript();
                     });
@@ -92,7 +95,8 @@ var ETtranscript = {
                             case 114: //f3
                             case 115: //f4
                                 _oEvent.preventDefault();
-                                ETaudio.jumpBySeconds(ETaudio.getCurrentPos()-(_oEvent.which - 111));
+                                ETtranscript.nAutoPlayBackLastStop = ETaudio.getCurrentPos()-(_oEvent.which - 111);
+                                ETaudio.jumpBySeconds(ETtranscript.nAutoPlayBackLastStop);
                                 ETaudio.play();
                                 break;
                             case 116: //f5
@@ -270,7 +274,8 @@ var ETtranscript = {
             .on('focusin', function(_oEvent) {
                 _oEvent.preventDefault();
                 $(this).removeClass('justreadme');
-                ETaudio.jumpBySeconds(ETtranscript.aPart[ETtranscript.getPartIndexFromId(_nParId)].nOffset);
+                ETtranscript.nAutoPlayBackLastStop = ETtranscript.aPart[ETtranscript.getPartIndexFromId(_nParId)].nOffset;
+                ETaudio.jumpBySeconds(ETtranscript.nAutoPlayBackLastStop);
                 ETaudio.play();
             })
             .on('focusout', function(_oEvent) {
