@@ -40,9 +40,11 @@ $(function() {
                             });
                         $(this).val('0');
                     });
+                    togglePage('upload')
+                } else {
+                    alert(_oResult.error);
+                    togglePage('login');
                 }
-                //show upload page
-                togglePage('upload')
             });
     });
     $('#page_login input').get(0).focus();
