@@ -7,6 +7,11 @@ Easy Transcript is a very simple tool that helps you to manually (!) transcribe 
 ## How does it help me?
 It helps you by giving you easy-to-access shortcuts to pause or play, jump back a few seconds, or adjust the speed of the audio file. There's also an auto-play mode that plays and pauses the audio track in order for you to keep up. Moreover, it keeps track of the speakers in order to provide color and number codings to individual speakers. Easy Transcript also adds timestamps to your transcripts and saves everything on your server so that you can continue your work from anywhere (with internet access).
 
+## Can you provide with some screenshots?
+Alright, fine. Although I have to tell you that screenshots do not tell a lot. After logging in you either upload an audio file or select a previously started project. By entering the main screen, there's an input box at the bottom where you can also select the current speaker and the adjust the time (both of which are also set automatically). There's a timeline and control section at the top. And of course there's the transcript in the center (scrollable) which indicates with colors which speaker said what.
+
+![Easy Transcript's main screen](https://easytranscript.haim.it/screenshot_main.png)
+
 ## Usage
 Log in, upload an audio file (limited to 100 MByte per file) or choose a previously uploaded one, and start transcribing. While transcribing some shortcuts come in handy. Use them when your cursor is placed inside the textbox on the bottom:
 - `F5` play/pause (just like the button on top)
@@ -57,7 +62,7 @@ I can probably help you with that but I'd rather not want your data on my server
 
 ## Frequently Asked Questions
 ### Is the data secure?
-The audio files, once uploaded, are not accessible from outside except one knows the password. Moreover, the database itself is not encrypted (which is rather common, though) but protected against access from outside using your password (and the salted hashing mechanism).
+No raw-text passwords are stored. The audio files, once uploaded, are not accessible from outside except one knows the password. Moreover, the database itself is not encrypted (which isn't rather common, though) but protected against access from outside using your password (and the salted hashing mechanism). So I guess you'll be fine but I have to admit that I this is not meant to be used for ever-to-stay-secret wires or the like.
 
 ### Does it automatically transcribe?
 No, sorry.
@@ -70,6 +75,9 @@ Most that I know of. But for file size reasons you can convert it into `.mp3` or
 
 ### I've set it up on my own server. How do I add new users?
 There is no administration backend (yet). So you have to create them directly in your database.
+
+### Couldn't you come up with a catchier name for the whole thing?
+__Easy Transcript__ is a plain description of what Easy Transcript is. Besides, it's shortcut is E.T. which at least I find funny as it's naming a software that helps you transcribe (and thus probably understand and analyze) spoken language. A thing, E.T. had to do as well (and sometimes had struggles with).
 
 ## Contact
 Please use any contact information you might find on the web (e-mail, Twitter, ...) or follow instructions on https://haim.it
