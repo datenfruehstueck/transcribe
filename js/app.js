@@ -19,7 +19,7 @@ $(function() {
         _oEvent.preventDefault();
         togglePage('load');
         var sUser = $('#page_login input[type="text"]').val(),
-            sPasswordHash = CryptoJS.MD5($('#page_login input[type="password"]').val() + 'SALT').toString();
+            sPasswordHash = CryptoJS.MD5($('#page_login input[type="password"]').val() + 'd41d8cd98f00b20').toString();
         //set upload page
         ETfile.setServerPassword(sUser, sPasswordHash);
         ETfile.init();
@@ -40,9 +40,11 @@ $(function() {
                             });
                         $(this).val('0');
                     });
+                    togglePage('upload')
+                } else {
+                    alert(_oResult.error);
+                    togglePage('login');
                 }
-                //show upload page
-                togglePage('upload')
             });
     });
     $('#page_login input').get(0).focus();
