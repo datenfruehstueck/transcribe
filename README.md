@@ -7,7 +7,7 @@ Easy Transcript is a very simple tool that helps you to manually (!) transcribe 
 ## How does it help me?
 It helps you by giving you easy-to-access shortcuts to pause or play, jump back a few seconds, or adjust the speed of the audio file. There's also an auto-play mode that plays and pauses the audio track in order for you to keep up. Moreover, it keeps track of the speakers in order to provide color and number codings to individual speakers. Easy Transcript also adds timestamps to your transcripts and saves everything on your server so that you can continue your work from anywhere (with internet access).
 
-## Can you provide with some screenshots?
+## Can you provide a screenshot?
 Alright, fine. Although I have to tell you that screenshots do not tell a lot. After logging in you either upload an audio file or select a previously started project. By entering the main screen, there's an input box at the bottom where you can also select the current speaker and the adjust the time (both of which are also set automatically). There's a timeline and control section at the top. And of course there's the transcript in the center (scrollable) which indicates with colors which speaker said what.
 
 ![Easy Transcript's main screen](https://easytranscript.haim.it/screenshot_main.png)
