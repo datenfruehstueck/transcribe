@@ -1,26 +1,21 @@
-# Easy Transcript
+# Online Transcription
 Load an audio file and start (manual) transcription.
 
 ## What does it do?
-Easy Transcript is a very simple tool that helps you to manually (!) transcribe your audio files. I built it in order to most-comfortably transcribe recorded interviews that I conducted over the course of my research. However, it can also be used for transcribing any group discussions (e.g., from focus groups) or talks (e.g., from presentations).
+Transcript is a simple tool that helps you to manually (!) transcribe your audio files. It is built in order to most-comfortably transcribe recorded interviews conducted through research. However, it can also be used for transcribing any group discussions (e.g., from focus groups) or talks (e.g., from presentations).
 
 ## How does it help me?
-It helps you by giving you easy-to-access shortcuts to pause or play, jump back a few seconds, or adjust the speed of the audio file. There's also an auto-play mode that plays and pauses the audio track in order for you to keep up. Moreover, it keeps track of the speakers in order to provide color and number codings to individual speakers. Easy Transcript also adds timestamps to your transcripts and saves everything on your server so that you can continue your work from anywhere (with internet access).
-
-## Can you provide a screenshot?
-Alright, fine. Although I have to tell you that screenshots do not tell a lot. After logging in you either upload an audio file or select a previously started project. By entering the main screen, there's an input box at the bottom where you can also select the current speaker and the adjust the time (both of which are also set automatically). There's a timeline and control section at the top. And of course there's the transcript in the center (scrollable) which indicates with colors which speaker said what.
-
-![Easy Transcript's main screen](https://easytranscript.haim.it/screenshot_main.png)
+It helps by giving you easy-to-access shortcuts to pause or play, jump back a few seconds, or adjust the speed of the audio file. There's also an auto-play mode that plays and pauses the audio track in order for you to keep up. Moreover, it keeps track of the speakers in order to provide color and number codings to individual speakers. Easy Transcript also adds timestamps to your transcripts and saves everything on a server so that you can continue your work from anywhere (with internet access).
 
 ## Usage
-Log in, upload an audio file (limited to 100 MByte per file) or choose a previously uploaded one, and start transcribing. While transcribing some shortcuts come in handy. Use them when your cursor is placed inside the textbox on the bottom:
+Log in, upload an audio file (limited to 100 MByte per file) or choose a previously uploaded one, and start transcribing. While transcribing, some shortcuts come in handy. Use them when your cursor is placed inside the textbox on the bottom:
 - `F5` play/pause (just like the button on top)
 - `F1` through `F4` jump back 1-4 seconds and play from there
 - `Enter` submit/save a piece of transcript which gets a timestamp and is ascribed to the currently set speaker (indiciated by the little dropdown next to the textbox on the bottom)
 - `Shift`+`Enter` add a line break into the textbox without submitting/saving
 - `F6` through `F8` enter auto-play mode where Easy Transcript plays for 4 (`F6`), 5 (`F7`), or 6 (`F8`) seconds, then pauses for one second, jumps back 2 seconds, and ultimately restarts the same procedure (playing for 4/5/6 seconds, pausing, jumping back). According to your typing speed, the speed of the speaker(s), and a somewhat adjusted speed setting, this auto-play feature gives you the perfect setup for just transcribing while listening. If I set it up correctly for myself (i.e., adjusted to me and the audio file) this allows me to straighly transcribe through the file without the necessity of much additional pausing or jumping. And the best thing is that you can actually calculate the time necessary and thus plan ahead. That's because every 4 seconds will take you an additional 3 seconds (1 = pause, 2 = jumping back). For example, if your file is 32 minutes long and you can work well with the 4-second auto-play feature combined with a audio-play speed that is reduced by one point on the scale (i.e., 90%), the 32-minute file will take you `32min = 1920sec x 110% (speed) x 175% (auto-play feature using 7 for every 4 seconds) = 3696sec = 61.6min or 61min and 36sec`.
 
-## Let's set it up.
+## Installation
 You need to have a server (or a webserver provider) that includes PHP and MySQL (a database). Then, the steps are as follows:
 - clone the repo
 - set up the database using `easytranscript.sql` inside the repository's main directory
@@ -58,26 +53,17 @@ Ultimately, your webserver's directory listing should look like this:
 - main.css
 
 ## Can I just use your installation?
-I can probably help you with that but I'd rather not want your data on my server. Contact me.
+Probably. Contact us.
 
 ## Frequently Asked Questions
 ### Is the data secure?
-No raw-text passwords are stored. The audio files, once uploaded, are not accessible from outside except one knows the password. Moreover, the database itself is not encrypted (which isn't rather common, though) but protected against access from outside using your password (and the salted hashing mechanism). So I guess you'll be fine but I have to admit that I this is not meant to be used for ever-to-stay-secret wires or the like.
+No raw-text passwords are stored. The audio files, once uploaded, are not accessible from outside except one knows the password. Moreover, the database itself is protected against access from outside using your password (and the salted hashing mechanism). So I guess you'll be fine but I have to admit that I this is not meant to be used for ever-to-stay-secret wires or the like.
 
 ### Does it automatically transcribe?
 No, sorry.
 
 ### But I read something about an auto-play setting?
-True, but it's auto-**play**, not auto-transcribe. This setting tells Easy Transcript to play a few seconds, then pause, jump back a little bit, and continue again. This should allow you to easily transcribe without the necessity of pausing or jumping all the time. Oh, and if it doesn't help you you can just ignore it.
+True, but it's auto-**play**, not auto-transcribe. This setting tells the software to play a few seconds, then pause, jump back a little bit, and continue again. This should allow you to easily transcribe without the necessity of pausing or jumping all the time. Oh, and if it doesn't help you you can just ignore it.
 
 ### What audio formats are accepted?
-Most that I know of. But for file size reasons you can convert it into `.mp3` or `.mp4`. If you want to do so you could use https://cloudconvert.com/
-
-### I've set it up on my own server. How do I add new users?
-There is no administration backend (yet). So you have to create them directly in your database.
-
-### Couldn't you come up with a catchier name for the whole thing?
-__Easy Transcript__ is a plain description of what Easy Transcript is. Besides, it's shortcut is E.T. which at least I find funny as it's naming a software that helps you transcribe (and thus probably understand and analyze) spoken language. A thing, E.T. had to do as well (and sometimes had struggles with).
-
-## Contact
-Please use any contact information you might find on the web (e-mail, Twitter, ...) or follow instructions on https://haim.it
+Most of them. But for file size reasons you can convert it into `.mp3` or `.mp4`. If you want to do so you could use https://cloudconvert.com/.

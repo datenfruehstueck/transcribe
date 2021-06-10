@@ -1,5 +1,5 @@
 {
-  "name": "easytranscript",
+  "name": "transcript",
   "description": "Load an audio file and start (manual) transcription.",
   "keywords": [
     "audio",

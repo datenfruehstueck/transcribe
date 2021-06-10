@@ -47,6 +47,17 @@ $(function() {
                 }
             });
     });
+    $('#page_login .btn-primary').off('click').on('click', function(_oEvent) {
+        _oEvent.preventDefault();
+        togglePage('load');
+        var sUser = $('#page_login input[type="text"]').val(),
+            sPasswordHash = CryptoJS.MD5($('#page_login input[type="password"]').val() + 'SALT').toString();
+        //register new user
+        $.getJSON('api/?r=' + sUser + '&p=' + sPasswordHash, function(_oResult) {
+            alert(_oResult.message);
+            togglePage('login');
+        });
+    });
     $('#page_login input').get(0).focus();
     
     //page navigation handler

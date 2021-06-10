@@ -5,6 +5,11 @@ define('DB_USER', 'your_database_user');
 define('DB_PASSWORD', 'your_database_password');
 define('DB_DATABASE', 'your_database');
 
+define('TEAM_MAIL', 'your@email');
+
+//URL to reach your installation, including http:// or https:// and excluding (!) a closing slash
+define('MAIN_URL', 'installation_url');
+
 
 
 /**
