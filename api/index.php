@@ -241,7 +241,7 @@ if($nLogin !== NULL && $nLogin > 0) {
         }
     }
     die('User not found');
-} elseif (isset($_GET['r']) && isset($_GET['p'])) {
+} elseif (isset($_GET['r']) && isset($_GET['p']) && filter_var($_GET['r'], FILTER_VALIDATE_EMAIL) !== FALSE) {
     if($oDb->query(sprintf('INSERT INTO `user` (sMail, sPassword, dCreate, bActive) VALUES (\'%s\', \'%s\', %d, 0)', $_GET['r'], $_GET['p'], time()))) {
         @mail(TEAM_MAIL,
             'New Transcript user registration',
